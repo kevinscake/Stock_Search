@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        
+        <title>Stock Search</title>
+        
+        <!-- Bootstrap css-->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- customer css-->
+        <link href="stock.css" rel="stylesheet">
+
+        <!-- including JQuery UI for autocomplete -->
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+        <!-- bootstrap toggle -->
+        <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+        <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+        <!--facebook meta -->
+        <meta property="fb:app_id"          content="236887469999153">
+        <meta property="og:site_name"       content="Stock Search">
+        <meta property="og:type"            content="website" >
+        <meta property="og:title"           content=""  id="facebookPostTitle">
+        <meta property="og:description"     content=""  id="facebookPostDescription">
+        <meta property="og:url"             content="http://dev.markitondemand.com/" >
+        <meta property="og:image"           content=""  id="facebookPostImage">
+        <meta property="og:image:width"     content="600px">
+        <meta property="og:image:height"     content="600px">
+        <meta content="en_US" property="og:locale">
+
+
+    </head>
+    
+    <body>
+        <!-- facebook SDK -->
+        <script>
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId      : '236887469999153',
+              xfbml      : true,
+              version    : 'v2.5'
+            });
+          };
+
+          (function(d, s, id){
+             var js, fjs = d.getElementsByTagName(s)[0];
+             if (d.getElementById(id)) {return;}
+             js = d.createElement(s); js.id = id;
+             js.src = "//connect.facebook.net/en_US/sdk.js";
+             fjs.parentNode.insertBefore(js, fjs);
+           }(document, 'script', 'facebook-jssdk'));
+        </script>
+
+        
+        <div class="container">
+
+            <!-- build a search form -->
+            <div id="formContainer">
+                <!-- Always use <form role="form"> (helps improve accessibility for people using screen readers) -->
+                <form  role="form" name="searchForm" action="" method="GET">
+                    
+                    <h1 id="searchFormH1">Stock Market Search</h1>
+
+                    <div class="row">
+
+                        
+                        <div class="col-sm-3" id="searchInputLabel">
+                        <label class="control-label" for="searchText">Enter the stock name or symbol:<span style="color:red">*</span></label>
+                        </div>
+                        <div class="col-sm-5" id="searchInputText">
+                            <!-- Add class .form-control to all textual <input>, <textarea>, and <select> elements -->
+                        <input type="text" class="form-control" id="searchText" name="NameOrSymbol" value= "" placeholder="Apple Inc or AAPL" required pattern="\S+" title="Please enter stock name or symbol"/>
+                        </div>
+                        
+                        
+                        <!-- GET QUOTE button & CLEAR button -->
+                        <div class="col-sm-4" id="searchFormButton">
+                            <button type="button" class="btn btn-primary" onclick="quoteClick(this.form)">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Get Quote
+                            </button>
+                            <button type="button" class="btn btn-default" onclick="clearClick(this.form)">
+                                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Clear
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-5 col-sm-offset-3" id="validationMsg">
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="disclaimerLogo">Powered by:</label><a id="disclaimerLogoLink"href="http://dev.markitondemand.com/MODApis/"><img id="disclaimerLogoImage" alt="Markit on Demand logo" src="http://cs-server.usc.edu:45678/hw/hw8/images/mod-logo.png" ></a>
+                        </div>
+                    </div>
+                        
+                </form>
+
+            </div>
+
+            <!-- horizontal line -->
+            <hr id="contentHR"></hr>
+
+            <!-- result area -->
+            
+            <!-- carousel for result -->
+            <!--
+                Carousels require the use of an id (in this case id="myCarousel") for carousel controls to function properly.
+
+                The class="carousel" specifies that this <div> contains a carousel.
+
+                The .slide class adds a CSS transition and animation effect, which makes the items slide when showing a new item. Omit this class if you do not want this effect.
+
+                The data-ride="carousel" attribute tells Bootstrap to begin animating the carousel immediately when the page loads.
+            -->
+            <div id="carouselForResult" class="carousel slide" data-interval="false">
+
+                <!-- Wrapper for slides -->
+                <div class="carousel-inner" role="listbox">
+
+                    <!-- favourite section -->
+                    <div class="item active">
+                        <div class="resultContainer">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    
+                                    <div id="FavouriteListPanelHeading" class="row">
+
+                                            <h id="FavouriteListText">Favourite List</h>
+
+                                            <!-- Auto refresh button -->
+                                            <input id="toggle-event" data-toggle="toggle" type="checkbox">
+                                            <!-- Manual refresh button -->
+                                            <button type="button" class=" pull-right btn btn-default" onclick = "refreshClick()">
+                                                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                                            </button>
+                                            <!-- right control button -->                                  
+                                            <button id="rightSlideButton" type="button" class=" pull-right btn btn-default" onclick = "rightSlide()" disabled>
+                                                <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                            </button> 
+                                        
+                                    </div>
+                                          
+                                </div>
+                                
+                                <div class="panel-body">
+                                    <p>@@!@#@!@!$@!$!@$</p>
+                                </div>
+                            
+                            </div>
+                        </div>
+                    </div>
+                    <!-- stock details section -->
+                    <div class="item">
+                        <div class="resultContainer">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <!-- left control button-->                                  
+                                    <button id="leftSlideButton" type="button" class="btn btn-default" onclick = "leftSlide()">
+                                        <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                                    </button>                                  
+                                </div>
+                                
+                                <div class="panel-body">
+                                    <!-- nevigation tabs -->
+                                    <div id="tabs">
+                                        <!-- Nav tabs -->
+                                        <ul id="pills" class="nav nav-pills">
+                                            <li id="defaultActiveTab" role="presentation" class="active"><a href="#currentStock" aria-controls="currentStock" role="tab" data-toggle="tab">Current Stock</a></li>
+                                            <li role="presentation"><a href="#historicalCharts" aria-controls="historicalCharts" role="tab" data-toggle="tab">Historical Charts</a></li>
+                                            <li role="presentation"><a href="#newsFeeds" aria-controls="newsFeeds" role="tab" data-toggle="tab">News Feeds</a></li>
+                                        </ul>
+                                    </div>
+
+                                    <hr id="stockDetailsSectionHR"></hr>
+
+                                    <!-- Tab panes -->
+                                    <div class="tab-content">
+                                        <!-- current stock -->
+                                        <div role="tabpanel" class="tab-pane active" id="currentStock">
+                                            <!-- information header -->
+                                            <div class="row" id="currentStockHeader">
+                                                <div class="pull-left">
+                                                    Stock Details
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="facebookPostButton" type="button" class="btn btn-default" onclick="facebookShareClick()">Facebook</button>
+                                                    <button type="button" class="btn btn-default" onclick = "" >Favourite</button>
+                                                </div>
+                                                
+                                            </div>
+
+                                            <!-- information section -->
+                                            <div class="row">
+
+                                                <!-- Stock Details Table -->
+                                                <div id="stockTableSection" class="col-sm-6">
+                                                </div>
+
+                                                <!-- Daily Stock Chart -->
+                                                <div id="stockChartSection" class="col-sm-6">
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Historical Charts -->
+                                        <div role="tabpanel" class="tab-pane" id="historicalCharts"></div>
+
+                                        <!-- News Feeds -->
+                                        <div role="tabpanel" class="tab-pane" id="newsFeeds"></div>
+
+                                    </div>
+
+                                </div>
+                            
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- /////////////////////script section//////////////////////// -->
+        <!-- Quote -->
+        <script>
+
+            //global variable for facebook
+            var quote_json_global;
+            var  pictureURL_global;
+
+            function quoteClick(thisform) {
+
+                var input = thisform.NameOrSymbol.value;
+
+                //validation: empty input
+                if(input=="") {
+                    document.getElementById("validationMsg").innerHTML = "Empty input";
+                }
+                else {
+                    //ajax call for validating
+                    $.ajax({
+                        url: "lookup.php",
+                        data: {userInput : input},
+                        type: "GET",
+                        datatype: "json",
+                        success: function(jsonStr) {
+                            //parse JSON String to JSON Obj
+                            var jsonObj = jQuery.parseJSON(jsonStr);
+
+                            ////validation: invalid input
+                            if(jsonObj.length==0) {
+                                //display message for invalid input
+                                document.getElementById("validationMsg").innerHTML = "Select a valid entry";
+                            }
+                            else {
+                                $.ajax({
+                                    url: "quote.php",
+                                    data: {userInput : input},
+                                    type: "GET",
+                                    datatype: "json",
+                                    success: function(jsonStr) {
+                                        //parse JSON String to JSON Obj
+                                        var jsonObj = jQuery.parseJSON(jsonStr);
+
+                                        //remove previous info
+                                        $("#stockTable").remove();
+                                        $("#dailyStockChart").remove();
+                                        $(".well").remove();
+
+                                        //slide result carousel to stock details section
+                                        rightSlide();
+
+                                        //slide right button enable
+                                        $("#rightSlideButton")[0].disabled = false;
+
+                                        //parse JSON data
+                                        if(jsonObj["Status"] == "SUCCESS") {
+                                            
+                                            /////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////////////////////////////////////create Stock Details Table/////////////////////////////////////////
+                                            /////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            $("#stockTableSection").append("<table id=\"stockTable\" class=\"table table-striped table-responsive\">");
+                                            
+                                            //build each row
+
+                                            var content = "";
+
+                                            //Name
+                                            content = "<tr>";
+                                            content += "<th>Name</th>";
+                                            content += "<td>"+jsonObj["Name"]+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+
+                                            //Symbol
+                                            content = "<tr>";
+                                            content += "<th>Symbol</th>";
+                                            content += "<td>"+jsonObj["Symbol"]+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Last Price
+                                            content = "<tr>";
+                                            content += "<th>Last Price</th>";
+                                            content += "<td>"+"$ "+jsonObj["LastPrice"]+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Change(Change Percent)
+                                            content = "<tr>";
+                                            content += "<th>Change(Change Percent)</th>";
+
+                                            var change = jsonObj["Change"].toFixed(2);
+                                            var changePercent = jsonObj["ChangePercent"].toFixed(2);
+
+                                            content += "<td>"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Time and Date
+                                            content = "<tr>";
+                                            content += "<th>Time and Date</th>";
+
+                                            var time = moment(jsonObj["Timestamp"]).format("DD MMM YYYY, HH:mm:ss A");
+
+                                            content += "<td>"+time+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Market Cap
+                                            content = "<tr>";
+                                            content += "<th>Market Cap</th>";
+
+                                            var marketCap = jsonObj["MarketCap"]/1000000000;
+
+                                            content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Volume
+                                            content = "<tr>";
+                                            content += "<th>Volume</th>";
+                                            content += "<td>"+jsonObj["Volume"]+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Change YTD(Chenge Percent YTD)
+                                            content = "<tr>";
+                                            content += "<th>Change YTD(Chenge Percent YTD)</th>";
+
+                                            var changeYTD = jsonObj["ChangeYTD"].toFixed(2);
+                                            var changePercentYTD = jsonObj["ChangePercentYTD"].toFixed(2);
+
+                                            content += "<td>"+changeYTD+" ( "+changePercentYTD +"%"+" ) "+arrowImage(changePercentYTD)+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //High Price
+                                            content = "<tr>";
+                                            content += "<th>High Price</th>";
+                                            content += "<td>"+"$ "+jsonObj["High"].toFixed(2)+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Low Price
+                                            content = "<tr>";
+                                            content += "<th>Low Price</th>";
+                                            content += "<td>"+"$ "+jsonObj["Low"].toFixed(2)+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            //Openning Price
+                                            content = "<tr>";
+                                            content += "<th>Openning Price</th>";
+                                            content += "<td>"+"$ "+jsonObj["Open"].toFixed(2)+"</td>";
+                                            content += "</tr>";
+                                            $("#stockTable").append(content);
+
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////////////////////////////////////create Stock Daily Charts/////////////////////////////////////////
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            var stockDailyChartURL = "http://chart.finance.yahoo.com/t?s=" + jsonObj["Symbol"]+ "&lang=en-US&width=600&height=450";
+                                            content = "<img id=\"dailyStockChart\" class=\"img-responsive\" src=\"" + stockDailyChartURL + "\" alt=\"daily stock chart\">";
+                                            $("#stockChartSection").append(content);
+                                            $("#facebookPostImage").append(stockDailyChartURL);
+
+
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////////////////////////////////////facebook feed/////////////////////////////////////////////////////
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            pictureURL_global = "http://chart.finance.yahoo.com/t?s=" + jsonObj["Symbol"]+ "&lang=en-US&width=300&height=350";
+
+                                            quote_json_global = jsonObj;
+
+                                            // $("#facebookPostButton").click({para1:jsonObj, para2:pictureURL}, function(event){ 
+                                            //     facebookShareClick(event.data.para1, event.data.para2);
+                                            //     console.log("xxx");
+                                            // });
+
+
+
+                                            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////////////////////////////////////create Historical Charts/////////////////////////////////////////
+                                            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                                            //Ajax call for chart data
+                                            $.ajax({
+                                                url: "chartData.php",
+                                                data: {   symbol : jsonObj["Symbol"] },
+                                                type: "GET",
+                                                datatype: "json",
+                                                success: function(jsonStr) {
+                                                    //parse JSON String to JSON Obj
+                                                    var jsonObj = jQuery.parseJSON(jsonStr);
+
+                                                    //HighStocks API renders data
+                                                    render(jsonObj);
+
+                                                }
+                                            });
+
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////////////////////////////////////create News Feeds/////////////////////////////////////////
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //Ajax call for search reasult
+                                            $.ajax({
+                                                url: "bingSearch.php",
+                                                data: {   symbol : jsonObj["Symbol"] },
+                                                type: "GET",
+                                                datatype: "json",
+                                                success: function(jsonStr) {
+                                                    //parse JSON String to JSON Obj
+                                                    var jsonObj = jQuery.parseJSON(jsonStr);
+
+                                                    //Parse news data and dispay
+                                                    newsDisplay(jsonObj);
+
+                                                }
+                                            });
+
+
+                                        }
+                                        else {
+                                            document.getElementById("validationMsg").innerHTML = "There is no stock infomation available";
+                                        }
+
+
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }    
+            }
+
+            //arrow image
+            function arrowImage(value) {
+                if(value>0) return "<img alt= \"Green_Arrow_Up\" src=\"http://cs-server.usc.edu:45678/hw/hw8/images/up.png\">";
+                else if(value<0) return "<img alt= \"Red_Arrow_Down\" src=\"http://cs-server.usc.edu:45678/hw/hw8/images/down.png\">";
+                else return "";
+            }
+
+        </script>
+
+        <!-- Clear -->
+        <script>
+            function clearClick(thisform) {
+                
+                //clear search text field
+                thisform.NameOrSymbol.value = "";
+
+                //reset result area(bootstrap carousel) to favourite section
+                leftSlide();
+
+                //disable right slide button
+                $("#rightSlideButton")[0].disabled = true;
+
+                //remove previous info
+                $("#stockTable").remove();
+                $("#dailyStockChart").remove();
+                $(".well").remove();
+            }   
+        </script>
+
+        <!-- autocomplete -->
+        <script>
+            $( "#searchText" ).autocomplete({
+                
+                //source: JSON data retrieved from server
+                source: function( request, response ) {
+                    $.ajax({
+                        url: "http://cs-server.usc.edu:27611/lookup.php",
+                        data: { userInput: request.term},
+                        type: "GET",
+                        datatype: "json",
+                        success: function( jsonStr ) {
+                            
+                            //parse JSON String to JSON Obj
+                            var jsonObj = jQuery.parseJSON(jsonStr);
+                            
+                            //parse JSON here
+                            if(jsonObj.length==0) {
+                                //print validation message about invalid input
+                                document.getElementById("validationMsg").innerHTML = "Select a valid entry";
+
+                                //response null
+                                response(null);
+
+                            }
+                            else {
+
+                                //clear validation message
+                                document.getElementById("validationMsg").innerHTML = "";
+
+                                var data = new Array();
+
+                                for(var i=0; i<jsonObj.length; i++) {
+                                    data[i] = { label: jsonObj[i].Symbol + " - " + jsonObj[i].Name + " ( " + jsonObj[i].Exchange + " ) ", value: jsonObj[i].Symbol};
+                                }
+
+                                //response data
+                                response( data );
+
+                            }                                
+                        }
+                    });
+                }
+            });
+        </script>
+
+        <!-- carousel control -->
+        <script>
+
+            function rightSlide(){
+                $('.carousel').carousel(1);
+            }
+
+            function leftSlide(){
+                $('.carousel').carousel(0);
+            }
+
+        </script>
+
+        <!-- aoto refresh -->
+        <script>
+            $(function() {
+                $('#toggle-event').change(function() {
+                    //...code...
+                })
+            })
+        </script>
+
+        <!-- facebook share -->
+        <script>
+
+            function facebookShareClick() {
+
+                var jsonObj = quote_json_global;
+
+                var pictureURL = pictureURL_global;
+
+                var title = "Current Stock Price of "+jsonObj["Name"]+" is $" + jsonObj["LastPrice"];
+
+                var des = "Stock Information of "+jsonObj["Name"]+ " ("+jsonObj["Symbol"]+")";
+
+                var cap = "LAST PRICE: $"+jsonObj["LastPrice"]+", CHANGE: "+jsonObj["Change"].toFixed(2)+" ("+jsonObj["ChangePercent"].toFixed(2)+"%)";
+
+                //post
+                FB.ui(  
+                    {
+
+                        method: "feed",
+                        link: "http://dev.markitondemand.com/",
+                        picture: pictureURL,
+                        name: title,
+                        description: des,
+                        caption: cap
+
+                    },
+                    //callback to check whether post sucessfully 
+                    function(response){
+                        if (response && !response.error_message) {
+                          alert('Posting sucessfully.');
+                        } else {
+                          alert('No Posted');
+                        }
+                    }
+                );
+            }
+
+        </script>
+
+        <!-- favourite -->
+        <script>
+            // function favourite(){
+            //     var currentImage = document.getElementById("favouriteStarIcon").var;
+            //     if(currentImage == ){
+            //         document.getElementById("favouriteStarIcon").src = "";
+            //     }
+            //     else{
+            //         document.getElementById("favouriteStarIcon").src = "";
+            //     }
+                
+            // }
+        </script>
+
+        <<!-- highstock render script -->
+        <script>
+
+            function _fixDate(dateIn) {
+                var dat = new Date(dateIn);
+                return Date.UTC(dat.getFullYear(), dat.getMonth(), dat.getDate());
+            };
+
+            function _getOHLC(json) {
+                var dates = json.Dates || [];
+                var elements = json.Elements || [];
+                var chartSeries = [];
+
+                if (elements[0]){
+
+                    for (var i = 0, datLen = dates.length; i < datLen; i++) {
+                        var dat = _fixDate( dates[i] );
+                        var pointData = [
+                            dat,
+                            elements[0].DataSeries['close'].values[i]
+                        ];
+                        chartSeries.push( pointData );
+                    };
+                }
+                return chartSeries;
+            };
+
+            function render(data) {
+                // split the data set into ohlc and volume
+
+                var ohlc = _getOHLC(data);
+
+                var symbol = data.Elements[0].Symbol;
+
+                // set the allowed units for data grouping
+                var groupingUnits = [[
+                    'week',                         // unit name
+                    [1]                             // allowed multiples
+                ], [
+                    'month',
+                    [1, 2, 3, 4, 6]
+                ]];
+
+                // create the chart
+                $('#historicalCharts').highcharts('StockChart', {
+                    
+                    rangeSelector: {
+                        selected: 0,
+
+                        buttons: [{
+                            type: 'week',
+                            count: 1,
+                            text: '1w'
+                        }, {
+                            type: 'month',
+                            count: 3,
+                            text: '3m'
+                        }, {
+                            type: 'month',
+                            count: 6,
+                            text: '6m'
+                        }, {
+                            type: 'ytd',
+                            text: 'YTD'
+                        }, {
+                            type: 'year',
+                            count: 1,
+                            text: '1y'
+                        }, {
+                            type: 'all',
+                            text: 'All'
+                        }]
+
+                    },
+
+                    title: {
+                        text: symbol + ' Stock Value'
+                    },
+
+                    yAxis: [{
+                        title: {
+                            text: 'Stock Value'
+                        },
+                        height: 200,
+                        lineWidth: 2
+                    }, {
+                        top: 300,
+                        height: 100,
+                        offset: 0,
+                        lineWidth: 2
+                    }],
+                    
+                    series: [{
+                        type: 'area',
+                        name: symbol,
+                        data: ohlc,
+                        dataGrouping: {
+                            units: groupingUnits
+                        }
+                    }],
+
+                    credits: {
+                        enabled:false
+                    }
+
+
+
+                });
+            };
+        </script>
+
+        <!-- News Feeds Script -->
+        <script>
+
+            function newsDisplay(json){
+                //get numbers of news
+                var numOfNews = json.d.results.length;
+
+                for(var i=0; i<numOfNews; i++) {
+                    var news = json.d.results[i];
+
+                    //create wells
+                    var content = "<div class=\"well\">";
+
+                    //create title & URL
+                    content += "<p class=\"newsTitle\"><a href=\"" + news.Url + "\" target=\"_blank\" >" + news.Title + "</a></p>";
+                    //create Content
+                    content += "<p class=\"newsContent\">" + news.Description + "</p>";
+                    //create Publisher
+                    content += "<p class=\"newsPublisher\">" +"Publisher: "+ news.Source + "</p>";
+                    //create Date
+                    var date = moment(news.Date).format("DD MMM YYYY HH:mm:ss");
+                    content += "<p class=\"newsDate\">" + "Date: "+date + "</p>";
+
+                    //close wells
+                    content += "</div>";
+
+                    $("#newsFeeds").append(content);
+
+                }
+
+
+            }
+        </script>
+
+    
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/bootstrap.min.js"></script>
+
+        <!-- moment.js -->
+        <script src="moment.js"></script>
+
+        <!-- highstock -->
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+
+    </body>
+</html>
