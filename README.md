@@ -1,2 +1,4 @@
 # Stock Search Web
-## Hello
+
+## course project for CSCI571
+
