@@ -1,0 +1,77 @@
+body {
+	background-color: rgb(26,64,98);
+}
+
+#formContainer {
+	background-color: white;
+	border-radius: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-bottom: 20px;
+}
+
+#searchFormH1 {
+                text-align: center;
+                font-style: Arial;
+                font-size: 20px;
+                padding-top: 20px;
+}
+
+ 
+#searchInputLabel, #searchInputText, #searchFormButton {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+#validationMsg {
+	color:red;
+}
+
+#disclaimerLogoImage {
+    height: 25px;
+    width: 125px;
+}
+
+#contentHR {
+	color: white;
+	height: 1px;
+}
+
+.resultContainer {
+	background-color: white;
+	border-radius: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-top: 15px;
+	padding-bottom: 30px;
+}
+
+#FavouriteListPanelHeading {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#stockDetailsSectionHR {
+	color: gray;
+	height: 1px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+
+#currentStockHeader {
+	padding-top: 20px;
+	padding-left: 30px;
+	padding-right: 30px;
+	padding-bottom: 20px;
+	font-weight: bold;
+}
+
+.newsPublisher {
+	padding-top: 20px;
+	font-weight: bold;
+}
+
+.newsDate {
+	font-weight: bold;
+}
