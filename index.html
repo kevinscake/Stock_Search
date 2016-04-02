@@ -10,6 +10,8 @@
         
         <!-- Bootstrap css-->
         <link href="css/bootstrap.min.css" rel="stylesheet">
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 
         <!-- customer css-->
         <link href="stock.css" rel="stylesheet">
@@ -22,19 +24,6 @@
         <!-- bootstrap toggle -->
         <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
         <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
-        <!--facebook meta -->
-        <meta property="fb:app_id"          content="236887469999153">
-        <meta property="og:site_name"       content="Stock Search">
-        <meta property="og:type"            content="website" >
-        <meta property="og:title"           content=""  id="facebookPostTitle">
-        <meta property="og:description"     content=""  id="facebookPostDescription">
-        <meta property="og:url"             content="http://dev.markitondemand.com/" >
-        <meta property="og:image"           content=""  id="facebookPostImage">
-        <meta property="og:image:width"     content="600px">
-        <meta property="og:image:height"     content="600px">
-        <meta content="en_US" property="og:locale">
-
 
     </head>
     
@@ -134,23 +123,39 @@
 
                                             <h id="FavouriteListText">Favourite List</h>
 
-                                            <!-- Auto refresh button -->
-                                            <input id="toggle-event" data-toggle="toggle" type="checkbox">
-                                            <!-- Manual refresh button -->
-                                            <button type="button" class=" pull-right btn btn-default" onclick = "refreshClick()">
-                                                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-                                            </button>
-                                            <!-- right control button -->                                  
-                                            <button id="rightSlideButton" type="button" class=" pull-right btn btn-default" onclick = "rightSlide()" disabled>
-                                                <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
-                                            </button> 
-                                        
+                                            <div class="pull-right">
+                                                <!-- Auto refresh button -->
+                                                <span id="autoRefreshToggle">Automatic Refresh:</span>
+
+                                                <input id="toggle-event"  data-toggle="toggle" type="checkbox">
+                                                <!-- Manual refresh button -->
+                                                <button type="button" class=" btn btn-default" onclick = "refreshClick()">
+                                                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                                                </button>
+                                                <!-- right control button -->                                  
+                                                <button id="rightSlideButton" type="button" class="btn btn-default" onclick = "rightSlide()" disabled>
+                                                    <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                                </button>
+                                            </div>
+
                                     </div>
                                           
                                 </div>
                                 
-                                <div class="panel-body">
-                                    <p>@@!@#@!@!$@!$!@$</p>
+                                <!-- favourite stock table -->
+                                <div id="favouriteTableSection" class="panel-body">
+                                    <!-- create table -->
+                                    <table id="favouriteTable" class="table table-striped table-responsive">
+                                        <!-- create table header -->
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Company Name</th>
+                                            <th>Stock Price</th>
+                                            <th>Change(Change Percent)</th>
+                                            <th>Market Cap</th>
+                                            <th></th>
+                                        </tr>
+                                    </table>
                                 </div>
                             
                             </div>
@@ -191,7 +196,9 @@
                                                 </div>
                                                 <div class="pull-right">
                                                     <button id="facebookPostButton" type="button" class="btn btn-default" onclick="facebookShareClick()">Facebook</button>
-                                                    <button type="button" class="btn btn-default" onclick = "" >Favourite</button>
+                                                    <button type="button" class="btn btn-default" onclick = "favouriteClick()" >
+                                                        <span id="favouriteStar" class="glyphicon glyphicon-star"></span>
+                                                    </button>
                                                 </div>
                                                 
                                             </div>
@@ -231,6 +238,65 @@
         </div>
 
         <!-- /////////////////////script section//////////////////////// -->
+
+
+        <!-- Load local Storage -->
+        <script>
+            $( document ).ready(function() {
+
+                if(localStorage.length != 0) {
+                    for (var i = 0; i < localStorage.length; i++){
+                        var symbol = localStorage.getItem(localStorage.key(i));
+
+                        //ajax call for newest stock info
+                        $.ajax({
+                                    url: "quote.php",
+                                    data: {userInput : symbol},
+                                    type: "GET",
+                                    datatype: "json",
+                                    success: function(jsonStr) {
+                                        //parse JSON String to JSON Obj
+                                        var jsonObj = jQuery.parseJSON(jsonStr);
+
+                                        //parse JSON data
+                                        if(jsonObj["Status"] == "SUCCESS") {
+
+                                            //create row
+                                            content = "<tr id=\""+ jsonObj.Symbol +"\">";
+                                            content += "<td>" + jsonObj.Symbol + "</td>";
+                                            content += "<td>" + jsonObj.Name + "</td>";
+                                            content += "<td>" + jsonObj.LastPrice + "</td>";
+                                            
+                                            var change = jsonObj.Change.toFixed(2);
+                                            var changePercent = jsonObj.ChangePercent.toFixed(2);
+                                            content += "<td>"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                                            
+                                            var marketCap = jsonObj["MarketCap"]/1000000000;
+                                            content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
+
+                                            ///delete button
+                                            var deleteButton = "<button type=\"button\" class=\"btn btn-default\" onclick = \"deleteClick("+"\'"+jsonObj.Symbol+"\'"+")\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></button>";
+
+                                            content += "<td>"+deleteButton+"</td>"; 
+
+                                            content += "</tr>";
+                                            $("#favouriteTable").append(content);
+
+                                        }
+                                    }
+                        });
+
+                    }
+                }
+                
+            });
+        </script>
+
+
+
+
+
+
         <!-- Quote -->
         <script>
 
@@ -403,12 +469,10 @@
 
                                             quote_json_global = jsonObj;
 
-                                            // $("#facebookPostButton").click({para1:jsonObj, para2:pictureURL}, function(event){ 
-                                            //     facebookShareClick(event.data.para1, event.data.para2);
-                                            //     console.log("xxx");
-                                            // });
-
-
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////////////////////////////////////favourite/////////////////////////////////////////////////////////
+                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            favouriteStarChange();
 
                                             ///////////////////////////////////////////////////////////////////////////////////////////////////////
                                             //////////////////////////////////////create Historical Charts/////////////////////////////////////////
@@ -601,18 +665,85 @@
 
         </script>
 
-        <!-- favourite -->
+        <!-- favourite & delete & refresh-->
         <script>
-            // function favourite(){
-            //     var currentImage = document.getElementById("favouriteStarIcon").var;
-            //     if(currentImage == ){
-            //         document.getElementById("favouriteStarIcon").src = "";
-            //     }
-            //     else{
-            //         document.getElementById("favouriteStarIcon").src = "";
-            //     }
+            
+
+            function favouriteStarChange(){
                 
-            // }
+                if(localStorage.getItem(quote_json_global.Symbol) === null) {
+                    $("#favouriteStar").css("color","white");
+                    $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black");
+                }
+                else{
+                    $("#favouriteStar").css("color","yellow");
+                    $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black,0 1px 0 black, 0 -1px 0 black");
+                }
+            }
+
+            function favouriteClick() {
+                var jsonObj = quote_json_global;
+                var content;
+
+                //if local storage doesn't have this item
+                if(localStorage.getItem(jsonObj.Symbol) === null) {
+
+                    console.log("not in storage & added");
+
+                    //add into local storage
+                    localStorage.setItem(jsonObj.Symbol, jsonObj.Symbol);
+
+                    //turn star icon on
+                    favouriteStarChange();
+
+
+                    //create row
+                    content = "<tr id=\""+ jsonObj.Symbol +"\">";
+                    content += "<td>" + jsonObj.Symbol + "</td>";
+                    content += "<td>" + jsonObj.Name + "</td>";
+                    content += "<td>" + jsonObj.LastPrice + "</td>";
+                    
+                    var change = jsonObj.Change.toFixed(2);
+                    var changePercent = jsonObj.ChangePercent.toFixed(2);
+                    content += "<td>"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                    
+                    var marketCap = jsonObj["MarketCap"]/1000000000;
+                    content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
+
+                    ///delete button
+                    var deleteButton = "<button type=\"button\" class=\"btn btn-default\" onclick = \"deleteClick("+"\'"+jsonObj.Symbol+"\'"+")\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></button>";
+
+                    content += "<td>"+deleteButton+"</td>"; 
+
+                    content += "</tr>";
+                    $("#favouriteTable").append(content);
+                }
+                else {
+
+                    
+                    //delete from table and local storage
+                    deleteClick(jsonObj.Symbol);
+                    
+                }
+                
+            }
+
+
+            function deleteClick(symbol) {
+
+                console.log("in storage && deleted");
+
+                //remove from table
+                $("#"+symbol).remove();
+
+                //remove from local storage
+                localStorage.removeItem(symbol);
+
+                //turn star icon off
+                favouriteStarChange();
+
+            }
+
         </script>
 
         <<!-- highstock render script -->
