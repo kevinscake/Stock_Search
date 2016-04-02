@@ -263,7 +263,7 @@
 
                                             //create row
                                             content = "<tr id=\""+ jsonObj.Symbol +"\">";
-                                            content += "<td>" + jsonObj.Symbol + "</td>";
+                                            content += "<td>" + "<a href=\"#\" onclick=\"quoteClick_gotInput("+"\'"+jsonObj.Symbol+"\'" +")\">" + jsonObj.Symbol +"</a>"+ "</td>";
                                             content += "<td>" + jsonObj.Name + "</td>";
                                             content += "<td>" + jsonObj.LastPrice + "</td>";
                                             
@@ -292,12 +292,7 @@
             });
         </script>
 
-
-
-
-
-
-        <!-- Quote -->
+        <!-- Quote-->
         <script>
 
             //global variable for facebook
@@ -305,8 +300,15 @@
             var  pictureURL_global;
 
             function quoteClick(thisform) {
-
+                
+                //extract input
                 var input = thisform.NameOrSymbol.value;
+
+                quoteClick_gotInput(input);
+
+            }
+
+            function quoteClick_gotInput(input) {
 
                 //validation: empty input
                 if(input=="") {
@@ -698,8 +700,9 @@
 
 
                     //create row
+                    //+ "<a href=\"#\">" + jsonObj.Symbol +"</a>"+
                     content = "<tr id=\""+ jsonObj.Symbol +"\">";
-                    content += "<td>" + jsonObj.Symbol + "</td>";
+                    content += "<td>" + "<a href=\"#\" onclick=\"quoteClick_gotInput("+"\'"+jsonObj.Symbol+"\'" +")\">" + jsonObj.Symbol +"</a>"+ "</td>";
                     content += "<td>" + jsonObj.Name + "</td>";
                     content += "<td>" + jsonObj.LastPrice + "</td>";
                     
