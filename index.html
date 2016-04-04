@@ -249,6 +249,8 @@
 
         <!-- Load local Storage -->
         <script>
+
+
             $( document ).ready(function() {
 
                 if(localStorage.length != 0) {
@@ -644,13 +646,53 @@
 
         </script>
 
-        <!-- aoto refresh -->
+        <!-- auto refresh -->
         <script>
             $(function() {
                 $('#toggle-event').change(function() {
                     //...code...
                 })
             })
+        </script>
+
+        <script>
+            function refreshClick() {
+
+                for (var i = 0; i < localStorage.length; i++){
+                    var symbol = localStorage.getItem(localStorage.key(i));
+
+                    //ajax call for newest stock info
+                    $.ajax({
+                                url: "quote.php",
+                                data: {userInput : symbol},
+                                type: "GET",
+                                datatype: "json",
+                                success: function(jsonStr) {
+                                    //parse JSON String to JSON Obj
+                                    var jsonObj = jQuery.parseJSON(jsonStr);
+
+                                    //parse JSON data
+                                    if(jsonObj["Status"] == "SUCCESS") {
+
+                                        //update row
+                                        $("#"+jsonObj.Symbol).find("td:eq(1)").html(jsonObj.Name);
+                                        $("#"+jsonObj.Symbol).find("td:eq(2)").html(jsonObj.LastPrice);
+                                        
+                                        var change = jsonObj.Change.toFixed(2);
+                                        var changePercent = jsonObj.ChangePercent.toFixed(2);
+                                        $("#"+jsonObj.Symbol).find("td:eq(3)").html(change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent));
+                                        
+                                        var marketCap = jsonObj["MarketCap"]/1000000000;
+                                        $("#"+jsonObj.Symbol).find("td:eq(4)").html(marketCap.toFixed(2)+" Billion");
+                                        
+
+                                    }
+                                }
+                    });
+
+                }
+
+            }
         </script>
 
         <!-- facebook share -->
