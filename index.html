@@ -315,6 +315,23 @@
 
             }
 
+            //validation
+            function validation(input, jsonObj) {
+
+                //no stock info match
+                if(jsonObj.length==0) {
+                    return false;
+                }   
+                
+                
+                for (stock in jsonObj) {
+                    if(input == jsonObj[stock].Symbol) return true;
+                }
+
+                //no stock symbol match
+                return false;
+            }
+
             function quoteClick_gotInput(input) {
 
                 //validation: empty input
@@ -332,8 +349,10 @@
                             //parse JSON String to JSON Obj
                             var jsonObj = jQuery.parseJSON(jsonStr);
 
-                            ////validation: invalid input
-                            if(jsonObj.length==0) {
+
+
+                            //invalid input
+                            if(!validation(input, jsonObj)) {
                                 //display message for invalid input
                                 document.getElementById("validationMsg").innerHTML = "Select a valid entry";
                             }
