@@ -83,3 +83,13 @@ body {
 .newsDate {
 	font-weight: bold;
 }
+
+#facebookPostButton {
+	width: 40px;
+	height: 40px;
+	cursor: pointer;
+}
+
+#favouriteStar {
+	font-size: 20px;
+}
