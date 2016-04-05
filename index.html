@@ -262,51 +262,63 @@
             $( document ).ready(function() {
 
                 if(localStorage.length != 0) {
+
+
+                    //create each row in order
                     for (var i = 0; i < localStorage.length; i++){
+                        var symbol = localStorage.getItem(localStorage.key(i));
+
+                        //create row
+                        var content = "<tr id=\""+ symbol +"\">";
+                        //1st col
+                        content += "<td>" + "<a href=\"#\" onclick=\"quoteClick_gotInput("+"\'"+symbol+"\'" +")\">" + symbol +"</a>"+ "</td>";
+                        //other 5 cols
+                        content += "<td></td><td></td><td id=\"changePercent_text_favouriteTable_"+symbol+"\"></td><td></td><td></td>";
+                        $("#favouriteTable").append(content);
+                    }
+
+                    //fill each row info
+                    for (var i = 0; i < localStorage.length; i++){
+
                         var symbol = localStorage.getItem(localStorage.key(i));
 
                         //ajax call for newest stock info
                         $.ajax({
-                                    url: "quote.php",
-                                    data: {userInput : symbol},
-                                    type: "GET",
-                                    datatype: "json",
-                                    success: function(jsonStr) {
-                                        //parse JSON String to JSON Obj
-                                        var jsonObj = jQuery.parseJSON(jsonStr);
+                                url: "quote.php",
+                                data: {userInput : symbol},
+                                type: "GET",
+                                datatype: "json",
+                                success: function(jsonStr) {
+                                    //parse JSON String to JSON Obj
+                                    var jsonObj = jQuery.parseJSON(jsonStr);
 
-                                        //parse JSON data
-                                        if(jsonObj["Status"] == "SUCCESS") {
+                                    //parse JSON data
+                                    if(jsonObj["Status"] == "SUCCESS") {
 
-                                            //create row
-                                            content = "<tr id=\""+ jsonObj.Symbol +"\">";
-                                            content += "<td>" + "<a href=\"#\" onclick=\"quoteClick_gotInput("+"\'"+jsonObj.Symbol+"\'" +")\">" + jsonObj.Symbol +"</a>"+ "</td>";
-                                            content += "<td>" + jsonObj.Name + "</td>";
-                                            content += "<td>" + jsonObj.LastPrice + "</td>";
-                                            
-                                            var change = jsonObj.Change.toFixed(2);
-                                            var changePercent = jsonObj.ChangePercent.toFixed(2);
-                                            content += "<td id=\""+"changePercent_text_favouriteTable_"+jsonObj.Symbol+"\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
-                                            
-                                            
-                                            var marketCap = jsonObj["MarketCap"]/1000000000;
-                                            content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
+                                        //update row
+                                        $("#"+jsonObj.Symbol).find("td:eq(1)").html(jsonObj.Name);
+                                        $("#"+jsonObj.Symbol).find("td:eq(2)").html(jsonObj.LastPrice);
+                                        
+                                        var change = jsonObj.Change.toFixed(2);
+                                        var changePercent = jsonObj.ChangePercent.toFixed(2);
+                                        $("#"+jsonObj.Symbol).find("td:eq(3)").html(change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent));
 
-                                            ///delete button
-                                            var deleteButton = "<button type=\"button\" class=\"btn btn-default\" onclick = \"deleteClick("+"\'"+jsonObj.Symbol+"\'"+")\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></button>";
+                                        text_color_changer(changePercent,"changePercent_text_favouriteTable_"+jsonObj.Symbol);
+                                        
+                                        var marketCap = jsonObj["MarketCap"]/1000000000;
+                                        $("#"+jsonObj.Symbol).find("td:eq(4)").html(marketCap.toFixed(2)+" Billion");
 
-                                            content += "<td>"+deleteButton+"</td>"; 
+                                        ///delete button
+                                        var deleteButton = "<button type=\"button\" class=\"btn btn-default\" onclick = \"deleteClick("+"\'"+jsonObj.Symbol+"\'"+")\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></button>";
 
-                                            content += "</tr>";
-                                            $("#favouriteTable").append(content);
-
-                                            text_color_changer(changePercent,"changePercent_text_favouriteTable_"+jsonObj.Symbol);
-
-                                        }
+                                        $("#"+jsonObj.Symbol).find("td:eq(5)").html(deleteButton);
                                     }
+
+                                }
                         });
 
                     }
+
                 }
                 
             });
