@@ -286,7 +286,8 @@
                                             
                                             var change = jsonObj.Change.toFixed(2);
                                             var changePercent = jsonObj.ChangePercent.toFixed(2);
-                                            content += "<td>"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                                            content += "<td id=\""+"changePercent_text_favouriteTable_"+jsonObj.Symbol+"\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                                            
                                             
                                             var marketCap = jsonObj["MarketCap"]/1000000000;
                                             content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
@@ -298,6 +299,8 @@
 
                                             content += "</tr>";
                                             $("#favouriteTable").append(content);
+
+                                            text_color_changer(changePercent,"changePercent_text_favouriteTable_"+jsonObj.Symbol);
 
                                         }
                                     }
@@ -428,9 +431,10 @@
                                             var change = jsonObj["Change"].toFixed(2);
                                             var changePercent = jsonObj["ChangePercent"].toFixed(2);
 
-                                            content += "<td>"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                                            content += "<td id=\"changePercent_text_detailsTable\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
                                             content += "</tr>";
                                             $("#stockTable").append(content);
+                                            text_color_changer(changePercent,"changePercent_text_detailsTable");
 
                                             //Time and Date
                                             content = "<tr>";
@@ -466,9 +470,10 @@
                                             var changeYTD = jsonObj["ChangeYTD"].toFixed(2);
                                             var changePercentYTD = jsonObj["ChangePercentYTD"].toFixed(2);
 
-                                            content += "<td>"+changeYTD+" ( "+changePercentYTD +"%"+" ) "+arrowImage(changePercentYTD)+"</td>";
+                                            content += "<td id=\"changeYTD_text_detailsTable\">"+changeYTD+" ( "+changePercentYTD +"%"+" ) "+arrowImage(changePercentYTD)+"</td>";
                                             content += "</tr>";
                                             $("#stockTable").append(content);
+                                            text_color_changer(changePercentYTD,"changeYTD_text_detailsTable");
 
                                             //High Price
                                             content = "<tr>";
@@ -568,9 +573,29 @@
 
             //arrow image
             function arrowImage(value) {
-                if(value>0) return "<img alt= \"Green_Arrow_Up\" src=\"http://cs-server.usc.edu:45678/hw/hw8/images/up.png\">";
-                else if(value<0) return "<img alt= \"Red_Arrow_Down\" src=\"http://cs-server.usc.edu:45678/hw/hw8/images/down.png\">";
+
+
+                if(value>0) {
+                    //arrow image
+                    return "<img alt= \"Green_Arrow_Up\" src=\"http://cs-server.usc.edu:45678/hw/hw8/images/up.png\">";
+                }
+                else if(value<0) {
+                     //arrow image
+                    return "<img alt= \"Red_Arrow_Down\" src=\"http://cs-server.usc.edu:45678/hw/hw8/images/down.png\">";
+
+                }
                 else return "";
+            }
+
+            //text-color changer
+            function text_color_changer(value, textID) {
+                if(value>0) {
+                    $("#"+textID).css('color', 'green');
+                }
+                else if(value<0) {
+                    $("#"+textID).css('color', 'red'); 
+                }
+                else {};
             }
 
         </script>
@@ -704,6 +729,8 @@
                                         var change = jsonObj.Change.toFixed(2);
                                         var changePercent = jsonObj.ChangePercent.toFixed(2);
                                         $("#"+jsonObj.Symbol).find("td:eq(3)").html(change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent));
+
+                                        text_color_changer(changePercent,"changePercent_text_favouriteTable_"+jsonObj.Symbol);
                                         
                                         var marketCap = jsonObj["MarketCap"]/1000000000;
                                         $("#"+jsonObj.Symbol).find("td:eq(4)").html(marketCap.toFixed(2)+" Billion");
@@ -799,7 +826,8 @@
                     
                     var change = jsonObj.Change.toFixed(2);
                     var changePercent = jsonObj.ChangePercent.toFixed(2);
-                    content += "<td>"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                    content += "<td id=\""+"changePercent_text_favouriteTable_"+jsonObj.Symbol+"\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                    
                     
                     var marketCap = jsonObj["MarketCap"]/1000000000;
                     content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
@@ -811,6 +839,8 @@
 
                     content += "</tr>";
                     $("#favouriteTable").append(content);
+
+                    text_color_changer(changePercent, "changePercent_text_favouriteTable_"+jsonObj.Symbol);
                 }
                 else {
 
