@@ -28,7 +28,6 @@
         <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
         <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
-
     </head>
     
     <body>
@@ -57,7 +56,7 @@
             <!-- build a search form -->
             <div id="formContainer">
                 <!-- Always use <form role="form"> (helps improve accessibility for people using screen readers) -->
-                <form  role="form" name="searchForm" action="" method="GET">
+                <form  role="form" id="searchForm" name="searchFormX" action="" method="GET">
                     
                     <h1 id="searchFormH1">Stock Market Search</h1>
 
@@ -69,13 +68,14 @@
                         </div>
                         <div class="col-sm-5" id="searchInputText">
                             <!-- Add class .form-control to all textual <input>, <textarea>, and <select> elements -->
-                        <input type="text" class="form-control" id="searchText" name="NameOrSymbol" value= "" placeholder="Apple Inc or AAPL" required pattern="\S+" title="Please enter stock name or symbol"/>
+                        <input type="text" class="form-control" id="searchText" name="NameOrSymbol" value= "" placeholder="Apple Inc or AAPL" required/>
                         </div>
                         
                         
                         <!-- GET QUOTE button & CLEAR button -->
                         <div class="col-sm-4" id="searchFormButton">
-                            <button type="button" class="btn btn-primary" onclick="quoteClick(this.form)">
+                            <!-- <button type="submit" class="btn btn-primary" onclick="quoteClick(this.form)"> -->
+                            <button type="submit" class="btn btn-primary" value="Get Quote">
                                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Get Quote
                             </button>
                             <button type="button" class="btn btn-default" onclick="clearClick(this.form)">
@@ -331,14 +331,20 @@
             var quote_json_global;
             var  pictureURL_global;
 
-            function quoteClick(thisform) {
-                
-                //extract input
-                var input = thisform.NameOrSymbol.value;
 
+            //submit button
+            $("#searchForm").submit(function(event){
+
+                var input = $("#searchText").val();
+                
                 quoteClick_gotInput(input);
 
-            }
+                //prevent page reload
+                return false;
+
+            });
+
+
 
             //validation
             function validation(input, jsonObj) {
@@ -357,230 +363,227 @@
                 return false;
             }
 
+            
+
+            
+
             function quoteClick_gotInput(input) {
 
-                //validation: empty input
-                if(input=="") {
-                    document.getElementById("validationMsg").innerHTML = "Empty input";
-                }
-                else {
-                    //ajax call for validating
-                    $.ajax({
-                        url: "lookup.php",
-                        data: {userInput : input},
-                        type: "GET",
-                        datatype: "json",
-                        success: function(jsonStr) {
-                            //parse JSON String to JSON Obj
-                            var jsonObj = jQuery.parseJSON(jsonStr);
+                $.ajax({
+                    url: "lookup.php",
+                    data: {userInput : input},
+                    type: "GET",
+                    datatype: "json",
+                    success: function(jsonStr) {
+                        //parse JSON String to JSON Obj
+                        var jsonObj = jQuery.parseJSON(jsonStr);
 
 
 
-                            //invalid input
-                            if(!validation(input, jsonObj)) {
-                                //display message for invalid input
-                                document.getElementById("validationMsg").innerHTML = "Select a valid entry";
-                            }
-                            else {
-                                $.ajax({
-                                    url: "quote.php",
-                                    data: {userInput : input},
-                                    type: "GET",
-                                    datatype: "json",
-                                    success: function(jsonStr) {
-                                        //parse JSON String to JSON Obj
-                                        var jsonObj = jQuery.parseJSON(jsonStr);
+                        //invalid input
+                        if(!validation(input, jsonObj)) {
+                            //display message for invalid input
+                            document.getElementById("validationMsg").innerHTML = "Select a valid entry";
+                        }
+                        else {
+                            $.ajax({
+                                url: "quote.php",
+                                data: {userInput : input},
+                                type: "GET",
+                                datatype: "json",
+                                success: function(jsonStr) {
+                                    //parse JSON String to JSON Obj
+                                    var jsonObj = jQuery.parseJSON(jsonStr);
 
-                                        //remove previous info
-                                        $("#stockTable").remove();
-                                        $("#dailyStockChart").remove();
-                                        $(".well").remove();
+                                    //remove previous info
+                                    $("#stockTable").remove();
+                                    $("#dailyStockChart").remove();
+                                    $(".well").remove();
 
-                                        //slide result carousel to stock details section
-                                        rightSlide();
+                                    //slide result carousel to stock details section
+                                    rightSlide();
 
-                                        //slide right button enable
-                                        $("#rightSlideButton")[0].disabled = false;
+                                    //slide right button enable
+                                    $("#rightSlideButton")[0].disabled = false;
 
-                                        //parse JSON data
-                                        if(jsonObj["Status"] == "SUCCESS") {
-                                            
-                                            /////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            //////////////////////////////////////create Stock Details Table/////////////////////////////////////////
-                                            /////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            $("#stockTableSection").append("<table id=\"stockTable\" class=\"table table-striped \">");
-                                            
-                                            //build each row
+                                    //parse JSON data
+                                    if(jsonObj["Status"] == "SUCCESS") {
+                                        
+                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        //////////////////////////////////////create Stock Details Table/////////////////////////////////////////
+                                        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        $("#stockTableSection").append("<table id=\"stockTable\" class=\"table table-striped \">");
+                                        
+                                        //build each row
 
-                                            var content = "";
+                                        var content = "";
 
-                                            //Name
-                                            content = "<tr>";
-                                            content += "<th>Name</th>";
-                                            content += "<td>"+jsonObj["Name"]+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-
-                                            //Symbol
-                                            content = "<tr>";
-                                            content += "<th>Symbol</th>";
-                                            content += "<td>"+jsonObj["Symbol"]+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            //Last Price
-                                            content = "<tr>";
-                                            content += "<th>Last Price</th>";
-                                            content += "<td>"+"$ "+jsonObj["LastPrice"]+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            //Change(Change Percent)
-                                            content = "<tr>";
-                                            content += "<th>Change(Change Percent)</th>";
-
-                                            var change = jsonObj["Change"].toFixed(2);
-                                            var changePercent = jsonObj["ChangePercent"].toFixed(2);
-
-                                            content += "<td id=\"changePercent_text_detailsTable\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-                                            text_color_changer(changePercent,"changePercent_text_detailsTable");
-
-                                            //Time and Date
-                                            content = "<tr>";
-                                            content += "<th>Time and Date</th>";
-
-                                            var time = moment(jsonObj["Timestamp"]).format("DD MMM YYYY, HH:mm:ss A");
-
-                                            content += "<td>"+time+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            //Market Cap
-                                            content = "<tr>";
-                                            content += "<th>Market Cap</th>";
-
-                                            var marketCap = jsonObj["MarketCap"]/1000000000;
-
-                                            content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            //Volume
-                                            content = "<tr>";
-                                            content += "<th>Volume</th>";
-                                            content += "<td>"+jsonObj["Volume"]+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            //Change YTD(Chenge Percent YTD)
-                                            content = "<tr>";
-                                            content += "<th>Change YTD(Chenge Percent YTD)</th>";
-
-                                            var changeYTD = jsonObj["ChangeYTD"].toFixed(2);
-                                            var changePercentYTD = jsonObj["ChangePercentYTD"].toFixed(2);
-
-                                            content += "<td id=\"changeYTD_text_detailsTable\">"+changeYTD+" ( "+changePercentYTD +"%"+" ) "+arrowImage(changePercentYTD)+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-                                            text_color_changer(changePercentYTD,"changeYTD_text_detailsTable");
-
-                                            //High Price
-                                            content = "<tr>";
-                                            content += "<th>High Price</th>";
-                                            content += "<td>"+"$ "+jsonObj["High"].toFixed(2)+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            //Low Price
-                                            content = "<tr>";
-                                            content += "<th>Low Price</th>";
-                                            content += "<td>"+"$ "+jsonObj["Low"].toFixed(2)+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            //Openning Price
-                                            content = "<tr>";
-                                            content += "<th>Openning Price</th>";
-                                            content += "<td>"+"$ "+jsonObj["Open"].toFixed(2)+"</td>";
-                                            content += "</tr>";
-                                            $("#stockTable").append(content);
-
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            //////////////////////////////////////create Stock Daily Charts/////////////////////////////////////////
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            var stockDailyChartURL = "http://chart.finance.yahoo.com/t?s=" + jsonObj["Symbol"]+ "&lang=en-US&width=600&height=450";
-                                            content = "<img id=\"dailyStockChart\" class=\"img-responsive\" src=\"" + stockDailyChartURL + "\" alt=\"daily stock chart\">";
-                                            $("#stockChartSection").append(content);
-                                            $("#facebookPostImage").append(stockDailyChartURL);
+                                        //Name
+                                        content = "<tr>";
+                                        content += "<th>Name</th>";
+                                        content += "<td>"+jsonObj["Name"]+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
 
 
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            //////////////////////////////////////facebook feed/////////////////////////////////////////////////////
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            pictureURL_global = "http://chart.finance.yahoo.com/t?s=" + jsonObj["Symbol"]+ "&lang=en-US&width=300&height=350";
+                                        //Symbol
+                                        content = "<tr>";
+                                        content += "<th>Symbol</th>";
+                                        content += "<td>"+jsonObj["Symbol"]+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
 
-                                            quote_json_global = jsonObj;
+                                        //Last Price
+                                        content = "<tr>";
+                                        content += "<th>Last Price</th>";
+                                        content += "<td>"+"$ "+jsonObj["LastPrice"]+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
 
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            //////////////////////////////////////favourite/////////////////////////////////////////////////////////
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            favouriteStarChange();
+                                        //Change(Change Percent)
+                                        content = "<tr>";
+                                        content += "<th>Change(Change Percent)</th>";
 
-                                            ///////////////////////////////////////////////////////////////////////////////////////////////////////
-                                            //////////////////////////////////////create Historical Charts/////////////////////////////////////////
-                                            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        var change = jsonObj["Change"].toFixed(2);
+                                        var changePercent = jsonObj["ChangePercent"].toFixed(2);
 
-                                            //Ajax call for chart data
-                                            $.ajax({
-                                                url: "chartData.php",
-                                                data: {   symbol : jsonObj["Symbol"] },
-                                                type: "GET",
-                                                datatype: "json",
-                                                success: function(jsonStr) {
-                                                    //parse JSON String to JSON Obj
-                                                    var jsonObj = jQuery.parseJSON(jsonStr);
+                                        content += "<td id=\"changePercent_text_detailsTable\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
+                                        text_color_changer(changePercent,"changePercent_text_detailsTable");
 
-                                                    //HighStocks API renders data
-                                                    render(jsonObj);
+                                        //Time and Date
+                                        content = "<tr>";
+                                        content += "<th>Time and Date</th>";
 
-                                                }
-                                            });
+                                        var time = moment(jsonObj["Timestamp"]).format("DD MMM YYYY, HH:mm:ss A");
 
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////
-                                            //////////////////////////////////////create News Feeds/////////////////////////////////////////
-                                            ////////////////////////////////////////////////////////////////////////////////////////////////
-                                            //Ajax call for search reasult
-                                            $.ajax({
-                                                url: "bingSearch.php",
-                                                data: {   symbol : jsonObj["Symbol"] },
-                                                type: "GET",
-                                                datatype: "json",
-                                                success: function(jsonStr) {
-                                                    //parse JSON String to JSON Obj
-                                                    var jsonObj = jQuery.parseJSON(jsonStr);
+                                        content += "<td>"+time+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
 
-                                                    //Parse news data and dispay
-                                                    newsDisplay(jsonObj);
+                                        //Market Cap
+                                        content = "<tr>";
+                                        content += "<th>Market Cap</th>";
 
-                                                }
-                                            });
+                                        var marketCap = jsonObj["MarketCap"]/1000000000;
+
+                                        content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
+
+                                        //Volume
+                                        content = "<tr>";
+                                        content += "<th>Volume</th>";
+                                        content += "<td>"+jsonObj["Volume"]+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
+
+                                        //Change YTD(Chenge Percent YTD)
+                                        content = "<tr>";
+                                        content += "<th>Change YTD(Chenge Percent YTD)</th>";
+
+                                        var changeYTD = jsonObj["ChangeYTD"].toFixed(2);
+                                        var changePercentYTD = jsonObj["ChangePercentYTD"].toFixed(2);
+
+                                        content += "<td id=\"changeYTD_text_detailsTable\">"+changeYTD+" ( "+changePercentYTD +"%"+" ) "+arrowImage(changePercentYTD)+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
+                                        text_color_changer(changePercentYTD,"changeYTD_text_detailsTable");
+
+                                        //High Price
+                                        content = "<tr>";
+                                        content += "<th>High Price</th>";
+                                        content += "<td>"+"$ "+jsonObj["High"].toFixed(2)+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
+
+                                        //Low Price
+                                        content = "<tr>";
+                                        content += "<th>Low Price</th>";
+                                        content += "<td>"+"$ "+jsonObj["Low"].toFixed(2)+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
+
+                                        //Openning Price
+                                        content = "<tr>";
+                                        content += "<th>Openning Price</th>";
+                                        content += "<td>"+"$ "+jsonObj["Open"].toFixed(2)+"</td>";
+                                        content += "</tr>";
+                                        $("#stockTable").append(content);
+
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        //////////////////////////////////////create Stock Daily Charts/////////////////////////////////////////
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        var stockDailyChartURL = "http://chart.finance.yahoo.com/t?s=" + jsonObj["Symbol"]+ "&lang=en-US&width=600&height=450";
+                                        content = "<img id=\"dailyStockChart\" class=\"img-responsive\" src=\"" + stockDailyChartURL + "\" alt=\"daily stock chart\">";
+                                        $("#stockChartSection").append(content);
+                                        $("#facebookPostImage").append(stockDailyChartURL);
 
 
-                                        }
-                                        else {
-                                            document.getElementById("validationMsg").innerHTML = "There is no stock infomation available";
-                                        }
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        //////////////////////////////////////facebook feed/////////////////////////////////////////////////////
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        pictureURL_global = "http://chart.finance.yahoo.com/t?s=" + jsonObj["Symbol"]+ "&lang=en-US&width=300&height=350";
+
+                                        quote_json_global = jsonObj;
+
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        //////////////////////////////////////favourite/////////////////////////////////////////////////////////
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        favouriteStarChange();
+
+                                        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+                                        //////////////////////////////////////create Historical Charts/////////////////////////////////////////
+                                        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                                        //Ajax call for chart data
+                                        $.ajax({
+                                            url: "chartData.php",
+                                            data: {   symbol : jsonObj["Symbol"] },
+                                            type: "GET",
+                                            datatype: "json",
+                                            success: function(jsonStr) {
+                                                //parse JSON String to JSON Obj
+                                                var jsonObj = jQuery.parseJSON(jsonStr);
+
+                                                //HighStocks API renders data
+                                                render(jsonObj);
+
+                                            }
+                                        });
+
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////
+                                        //////////////////////////////////////create News Feeds/////////////////////////////////////////
+                                        ////////////////////////////////////////////////////////////////////////////////////////////////
+                                        //Ajax call for search reasult
+                                        $.ajax({
+                                            url: "bingSearch.php",
+                                            data: {   symbol : jsonObj["Symbol"] },
+                                            type: "GET",
+                                            datatype: "json",
+                                            success: function(jsonStr) {
+                                                //parse JSON String to JSON Obj
+                                                var jsonObj = jQuery.parseJSON(jsonStr);
+
+                                                //Parse news data and dispay
+                                                newsDisplay(jsonObj);
+
+                                            }
+                                        });
 
 
                                     }
-                                });
-                            }
+                                    else {
+                                        document.getElementById("validationMsg").innerHTML = "There is no stock infomation available";
+                                    }
+
+
+                                }
+                            });
                         }
-                    });
-                }    
+                    }
+                });  
             }
 
             //arrow image
