@@ -170,10 +170,14 @@
                         <div class="resultContainer">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <!-- left control button-->                                  
-                                    <button id="leftSlideButton" type="button" class="btn btn-default" onclick = "leftSlide()">
+
+                                    <!-- header -->
+                                    <div id="stockDetailsHeader">
+                                    <!-- left control button-->  
+                                    <button id="leftSlideButton" type="button" class="btn btn-default pull-left" onclick = "leftSlide()">
                                         <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                                    </button>                                  
+                                    </button>Stock Details</div>
+                                  
                                 </div>
                                 
                                 <div class="panel-body">
@@ -881,9 +885,18 @@
 
                 // create the chart
                 $('#historicalCharts').highcharts('StockChart', {
+
+                    navigation:{
+                        buttonOptions:{
+                            enabled:false
+                        }
+                    },
                     
                     rangeSelector: {
                         selected: 0,
+
+                        inputEnabled:false,
+                        allButtonsEnabled: true,
 
                         buttons: [{
                             type: 'week',
@@ -934,14 +947,30 @@
                         data: ohlc,
                         dataGrouping: {
                             units: groupingUnits
+                        },
+                        tooltip:{
+                            valueDecimals:2,
+                            valuePrefix:"$"
+                        },
+
+                        fillColor : {
+                            linearGradient : {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops : [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
                         }
+
                     }],
 
                     credits: {
                         enabled:false
                     }
-
-
 
                 });
             };
@@ -994,6 +1023,7 @@
 
         <!-- highstock -->
         <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 
 
     </body>
