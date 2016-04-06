@@ -370,8 +370,8 @@
             function quoteClick_gotInput(input) {
 
                 $.ajax({
-                    url: "lookup.php",
-                    data: {userInput : input},
+                    url: "StockSearch.php",
+                    data: {lookupInput : input},
                     type: "GET",
                     datatype: "json",
                     success: function(jsonStr) {
@@ -387,8 +387,8 @@
                         }
                         else {
                             $.ajax({
-                                url: "quote.php",
-                                data: {userInput : input},
+                                url: "StockSearch.php",
+                                data: {quoteInput : input},
                                 type: "GET",
                                 datatype: "json",
                                 success: function(jsonStr) {
@@ -539,8 +539,8 @@
 
                                         //Ajax call for chart data
                                         $.ajax({
-                                            url: "chartData.php",
-                                            data: {   symbol : jsonObj["Symbol"] },
+                                            url: "StockSearch.php",
+                                            data: {  chart_symbol : jsonObj["Symbol"] },
                                             type: "GET",
                                             datatype: "json",
                                             success: function(jsonStr) {
@@ -558,8 +558,8 @@
                                         ////////////////////////////////////////////////////////////////////////////////////////////////
                                         //Ajax call for search reasult
                                         $.ajax({
-                                            url: "bingSearch.php",
-                                            data: {   symbol : jsonObj["Symbol"] },
+                                            url: "StockSearch.php",
+                                            data: {   bing_symbol : jsonObj["Symbol"] },
                                             type: "GET",
                                             datatype: "json",
                                             success: function(jsonStr) {
@@ -642,8 +642,8 @@
                 //source: JSON data retrieved from server
                 source: function( request, response ) {
                     $.ajax({
-                        url: "http://cs-server.usc.edu:27611/lookup.php",
-                        data: { userInput: request.term},
+                        url: "StockSearch.php",
+                        data: { lookupInput: request.term},
                         type: "GET",
                         datatype: "json",
                         success: function( jsonStr ) {
