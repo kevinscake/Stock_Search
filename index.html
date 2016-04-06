@@ -190,7 +190,7 @@
                                             <li role="presentation"><a href="#historicalCharts" aria-controls="historicalCharts" role="tab" data-toggle="tab" id="historicalCharts_button"><span class="noInSmall">Historical</span> Charts</a></li>
 
                                             <li role="presentation"><a href="#newsFeeds" aria-controls="newsFeeds" role="tab" data-toggle="tab">News <span class="noInSmall">Feeds</span></a></li>
-                                            
+
                                         </ul>
                                     </div>
 
@@ -268,9 +268,14 @@
 
 
                     //create each row in order
-                    for (var i = 0; i < localStorage.length; i++){
-                        var symbol = localStorage.getItem(localStorage.key(i));
+                    // for (var i = 0; i < localStorage.length; i++){
+                    //     var symbol = localStorage.getItem(localStorage.key(i));
 
+                    var ItemsArray = JSON.parse(localStorage.getItem("localItems"));
+                    for (var i = 0; i < ItemsArray.length; i++){
+                        var symbol = ItemsArray[i];
+
+                        
                         //create row
                         var content = "<tr id=\""+ symbol +"\">";
                         //1st col
@@ -281,10 +286,13 @@
                     }
 
                     //fill each row info
-                    for (var i = 0; i < localStorage.length; i++){
+                    // for (var i = 0; i < localStorage.length; i++){
+                    //     var symbol = localStorage.getItem(localStorage.key(i));
 
-                        var symbol = localStorage.getItem(localStorage.key(i));
+                    for (var i = 0; i < ItemsArray.length; i++){
+                        var symbol = ItemsArray[i];
 
+                        
                         //ajax call for newest stock info
                         $.ajax({
                                 url: "http://gentle-dominion-127300.appspot.com/",
@@ -725,8 +733,12 @@
         <script>
             function refreshClick() {
 
-                for (var i = 0; i < localStorage.length; i++){
-                    var symbol = localStorage.getItem(localStorage.key(i));
+                // for (var i = 0; i < localStorage.length; i++){
+                //     var symbol = localStorage.getItem(localStorage.key(i));
+
+                var ItemsArray = JSON.parse(localStorage.getItem("localItems"));
+                for(var i=0; i<ItemsArray.length; i++) {
+                    var symbol = ItemsArray[i];
 
                     //ajax call for newest stock info
                     $.ajax({
@@ -808,15 +820,37 @@
         <script>
             
 
-            function favouriteStarChange(){
+            // function favouriteStarChange(){
                 
-                if(localStorage.getItem(quote_json_global.Symbol) === null) {
+            //     if(localStorage.getItem(quote_json_global.Symbol) === null) {
+            //         $("#favouriteStar").css("color","white");
+            //         $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black");
+            //     }
+            //     else{
+            //         $("#favouriteStar").css("color","yellow");
+            //         $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black,0 1px 0 black, 0 -1px 0 black");
+            //     }
+            // }
+
+
+            function favouriteStarChange(){
+
+
+                
+                if(localStorage.getItem("localItems") === null) {
                     $("#favouriteStar").css("color","white");
                     $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black");
                 }
-                else{
-                    $("#favouriteStar").css("color","yellow");
-                    $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black,0 1px 0 black, 0 -1px 0 black");
+                else {
+                    var ItemsArray = JSON.parse(localStorage.getItem("localItems"));
+                    if(jQuery.inArray( quote_json_global.Symbol ,  ItemsArray) == -1) {
+                        $("#favouriteStar").css("color","white");
+                        $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black, 0 1px 0 black, 0 -1px 0 black");
+                    }
+                    else {
+                        $("#favouriteStar").css("color","yellow");
+                        $("#favouriteStar").css("text-shadow","1px 0 0 black, -1px 0 0 black,0 1px 0 black, 0 -1px 0 black");
+                    }
                 }
             }
 
@@ -824,17 +858,17 @@
                 var jsonObj = quote_json_global;
                 var content;
 
-                //if local storage doesn't have this item
-                if(localStorage.getItem(jsonObj.Symbol) === null) {
 
-                    console.log("not in storage & added");
+                //if local storage is empty
+                if(localStorage.getItem("localItems") === null) {
+                    //create Items Array
+                    var ItemsArray = [jsonObj.Symbol];
 
-                    //add into local storage
-                    localStorage.setItem(jsonObj.Symbol, jsonObj.Symbol);
+                    //convert to JSON string and store it 
+                    localStorage.setItem("localItems", JSON.stringify(ItemsArray));
 
                     //turn star icon on
                     favouriteStarChange();
-
 
                     //create row
                     //+ "<a href=\"#\">" + jsonObj.Symbol +"</a>"+
@@ -860,32 +894,145 @@
                     $("#favouriteTable").append(content);
 
                     text_color_changer(changePercent, "changePercent_text_favouriteTable_"+jsonObj.Symbol);
+
                 }
                 else {
 
-                    
-                    //delete from table and local storage
-                    deleteClick(jsonObj.Symbol);
+
+                    var ItemsArray = JSON.parse(localStorage.getItem("localItems"));
+
+                    //if local storage doesn't have this symbol
+                    if(jQuery.inArray( jsonObj.Symbol ,  ItemsArray) == -1) {
+
+
+                        //append current symbol to the end of array
+                        ItemsArray.push(jsonObj.Symbol);
+
+                        //convert array to JSON string and store it 
+                        localStorage.setItem("localItems", JSON.stringify(ItemsArray));
+
+
+                        //turn star icon on
+                        favouriteStarChange();
+
+                        //create row
+                        //+ "<a href=\"#\">" + jsonObj.Symbol +"</a>"+
+                        content = "<tr id=\""+ jsonObj.Symbol +"\">";
+                        content += "<td>" + "<a href=\"#\" onclick=\"quoteClick_gotInput("+"\'"+jsonObj.Symbol+"\'" +")\">" + jsonObj.Symbol +"</a>"+ "</td>";
+                        content += "<td>" + jsonObj.Name + "</td>";
+                        content += "<td>" + jsonObj.LastPrice + "</td>";
+                        
+                        var change = jsonObj.Change.toFixed(2);
+                        var changePercent = jsonObj.ChangePercent.toFixed(2);
+                        content += "<td id=\""+"changePercent_text_favouriteTable_"+jsonObj.Symbol+"\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                        
+                        
+                        var marketCap = jsonObj["MarketCap"]/1000000000;
+                        content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
+
+                        ///delete button
+                        var deleteButton = "<button type=\"button\" class=\"btn btn-default\" onclick = \"deleteClick("+"\'"+jsonObj.Symbol+"\'"+")\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></button>";
+
+                        content += "<td>"+deleteButton+"</td>"; 
+
+                        content += "</tr>";
+                        $("#favouriteTable").append(content);
+
+                        text_color_changer(changePercent, "changePercent_text_favouriteTable_"+jsonObj.Symbol);
+                    }
+                    else {
+
+                        //delete from table and local storage
+                        deleteClick(jsonObj.Symbol);
+                        
+                    }
                     
                 }
+
+                // //if local storage doesn't have this item
+                // if(localStorage.getItem(jsonObj.Symbol) === null) {
+
+                //     //add into local storage
+                //     localStorage.setItem(jsonObj.Symbol, jsonObj.Symbol);
+
+                //     //turn star icon on
+                //     favouriteStarChange();
+
+
+                //     //create row
+                //     //+ "<a href=\"#\">" + jsonObj.Symbol +"</a>"+
+                //     content = "<tr id=\""+ jsonObj.Symbol +"\">";
+                //     content += "<td>" + "<a href=\"#\" onclick=\"quoteClick_gotInput("+"\'"+jsonObj.Symbol+"\'" +")\">" + jsonObj.Symbol +"</a>"+ "</td>";
+                //     content += "<td>" + jsonObj.Name + "</td>";
+                //     content += "<td>" + jsonObj.LastPrice + "</td>";
+                    
+                //     var change = jsonObj.Change.toFixed(2);
+                //     var changePercent = jsonObj.ChangePercent.toFixed(2);
+                //     content += "<td id=\""+"changePercent_text_favouriteTable_"+jsonObj.Symbol+"\">"+change+" ( "+changePercent +"%"+" ) "+arrowImage(changePercent)+"</td>";
+                    
+                    
+                //     var marketCap = jsonObj["MarketCap"]/1000000000;
+                //     content += "<td>"+marketCap.toFixed(2)+" Billion"+"</td>";
+
+                //     ///delete button
+                //     var deleteButton = "<button type=\"button\" class=\"btn btn-default\" onclick = \"deleteClick("+"\'"+jsonObj.Symbol+"\'"+")\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></button>";
+
+                //     content += "<td>"+deleteButton+"</td>"; 
+
+                //     content += "</tr>";
+                //     $("#favouriteTable").append(content);
+
+                //     text_color_changer(changePercent, "changePercent_text_favouriteTable_"+jsonObj.Symbol);
+                // }
+                // else {
+  
+                //     //delete from table and local storage
+                //     deleteClick(jsonObj.Symbol);
+                    
+                // }
                 
             }
 
 
             function deleteClick(symbol) {
 
-                console.log("in storage && deleted");
+                var ItemsArray = JSON.parse(localStorage.getItem("localItems"));
 
+                var index = jQuery.inArray( symbol ,  ItemsArray);
+
+                //if array only have 1 items
+                if(ItemsArray.length == 1) {
+                    localStorage.removeItem("localItems");
+                }
+                else {
+                    //delete it from array and local storage
+                    ItemsArray.splice(index, 1);
+
+                    //update local storage
+                    localStorage.setItem("localItems", JSON.stringify(ItemsArray));
+                }
+                
                 //remove from table
                 $("#"+symbol).remove();
-
-                //remove from local storage
-                localStorage.removeItem(symbol);
 
                 //turn star icon off
                 favouriteStarChange();
 
             }
+
+
+            // function deleteClick(symbol) {
+
+            //     //remove from table
+            //     $("#"+symbol).remove();
+
+            //     //remove from local storage
+            //     localStorage.removeItem(symbol);
+
+            //     //turn star icon off
+            //     favouriteStarChange();
+
+            // }
 
         </script>
 
