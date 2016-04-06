@@ -284,8 +284,8 @@
 
                         //ajax call for newest stock info
                         $.ajax({
-                                url: "quote.php",
-                                data: {userInput : symbol},
+                                url: "http://gentle-dominion-127300.appspot.com/",
+                                data: {quoteInput : symbol},
                                 type: "GET",
                                 datatype: "json",
                                 success: function(jsonStr) {
@@ -369,8 +369,9 @@
 
             function quoteClick_gotInput(input) {
 
+                //validation ajax call
                 $.ajax({
-                    url: "StockSearch.php",
+                    url: "http://gentle-dominion-127300.appspot.com/",
                     data: {lookupInput : input},
                     type: "GET",
                     datatype: "json",
@@ -387,7 +388,7 @@
                         }
                         else {
                             $.ajax({
-                                url: "StockSearch.php",
+                                url: "http://gentle-dominion-127300.appspot.com/",
                                 data: {quoteInput : input},
                                 type: "GET",
                                 datatype: "json",
@@ -539,7 +540,7 @@
 
                                         //Ajax call for chart data
                                         $.ajax({
-                                            url: "StockSearch.php",
+                                            url: "http://gentle-dominion-127300.appspot.com/",
                                             data: {  chart_symbol : jsonObj["Symbol"] },
                                             type: "GET",
                                             datatype: "json",
@@ -558,7 +559,7 @@
                                         ////////////////////////////////////////////////////////////////////////////////////////////////
                                         //Ajax call for search reasult
                                         $.ajax({
-                                            url: "StockSearch.php",
+                                            url: "http://gentle-dominion-127300.appspot.com/",
                                             data: {   bing_symbol : jsonObj["Symbol"] },
                                             type: "GET",
                                             datatype: "json",
@@ -642,7 +643,7 @@
                 //source: JSON data retrieved from server
                 source: function( request, response ) {
                     $.ajax({
-                        url: "StockSearch.php",
+                        url: "http://gentle-dominion-127300.appspot.com/",
                         data: { lookupInput: request.term},
                         type: "GET",
                         datatype: "json",
@@ -726,8 +727,8 @@
 
                     //ajax call for newest stock info
                     $.ajax({
-                                url: "quote.php",
-                                data: {userInput : symbol},
+                                url: "http://gentle-dominion-127300.appspot.com/",
+                                data: {quoteInput : symbol},
                                 type: "GET",
                                 datatype: "json",
                                 success: function(jsonStr) {
