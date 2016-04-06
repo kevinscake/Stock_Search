@@ -186,7 +186,7 @@
                                         <!-- Nav tabs -->
                                         <ul id="pills" class="nav nav-pills">
                                             <li id="defaultActiveTab" role="presentation" class="active"><a href="#currentStock" aria-controls="currentStock" role="tab" data-toggle="tab">Current Stock</a></li>
-                                            <li role="presentation"><a href="#historicalCharts" aria-controls="historicalCharts" role="tab" data-toggle="tab">Historical Charts</a></li>
+                                            <li role="presentation"><a href="#historicalCharts" aria-controls="historicalCharts" role="tab" data-toggle="tab" id="historicalCharts_button">Historical Charts</a></li>
                                             <li role="presentation"><a href="#newsFeeds" aria-controls="newsFeeds" role="tab" data-toggle="tab">News Feeds</a></li>
                                         </ul>
                                     </div>
@@ -1020,6 +1020,15 @@
 
                 });
             };
+
+            //debug code for initial chart size
+            $("#historicalCharts_button").click(function(){
+                
+                setTimeout(function(){
+                    $("#historicalCharts").highcharts().reflow();
+                },10)
+
+            });
         </script>
 
         <!-- News Feeds Script -->
